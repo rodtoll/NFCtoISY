@@ -81,6 +81,8 @@ public class MainActivity extends ActionBarActivity {
 
                         String uriText = new String(relevantPayload, Charset.forName("US-ASCII"));
 
+                        // Comment
+
                         try
                         {
                             URI uri = new URI(uriText);
