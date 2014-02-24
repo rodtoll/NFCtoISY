@@ -7,6 +7,8 @@ package troublex3.nfctoisy.app;
 import java.net.*;
 import java.io.*;
 import java.util.concurrent.ThreadFactory;
+import android.os.Handler;
+import android.os.Message;
 
 import android.util.*;
 
@@ -19,9 +21,9 @@ public class ISYDevice {
         password = _password;
     }
 
-    public ISYHttpRequest ExecuteRequest(String deviceAddress, boolean stateToSet)
+    public ISYHttpRequest ExecuteRequest(String deviceAddress, boolean stateToSet, Handler resultHandler)
     {
-        ISYHttpRequest request = new ISYHttpRequest(address, userName, password, deviceAddress, stateToSet);
+        ISYHttpRequest request = new ISYHttpRequest(address, userName, password, deviceAddress, stateToSet, resultHandler);
         new Thread(request).start();
         return request;
     }

@@ -3,6 +3,8 @@ package troublex3.nfctoisy.app;
 import java.net.*;
 import java.io.*;
 import android.util.*;
+import android.os.Handler;
+import android.os.Message;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -17,7 +19,9 @@ public class ISYHttpRequest implements Runnable {
             String _userName,
             String _password,
             String _deviceAddress,
-            boolean _stateToSet
+            boolean _stateToSet,
+            Handler _resultHandler
+
     )
     {
         deviceAddress = _deviceAddress.replaceAll(" ", "%20");
@@ -27,6 +31,7 @@ public class ISYHttpRequest implements Runnable {
         userName = _userName;
         password = _password;
         resultCode = -2;
+        resultHandler = _resultHandler;
     }
 
     protected int GetResultCode(XmlPullParser parser) throws XmlPullParserException, IOException
@@ -56,7 +61,6 @@ public class ISYHttpRequest implements Runnable {
     public void run()
     {
         String message;
-        boolean completed = false;
         String url = "http://" + isyAddress + "/rest/nodes/" + deviceAddress + "/cmd/" + ((stateToSet) ? "DON" : "DOF");
 
         try
@@ -98,6 +102,8 @@ public class ISYHttpRequest implements Runnable {
         synchronized (this)
         {
             completed = true;
+            Message newMessage = resultHandler.obtainMessage(getResult());
+            newMessage.sendToTarget();
         }
     }
 
@@ -124,4 +130,5 @@ public class ISYHttpRequest implements Runnable {
     protected boolean stateToSet;
     protected boolean completed;
     protected Integer resultCode;
+    protected Handler resultHandler;
 }

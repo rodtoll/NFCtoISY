@@ -39,7 +39,7 @@ public class DeviceMappingDatabaseHandler extends SQLiteOpenHelper
                 + KEY_ID + " INTEGER PRIMARY KEY," + KEY_DEVICE_MAP_DEVICE_ALIAS + " TEXT,"
                 + KEY_DEVICE_MAP_DEVICE_ADDRESS + " TEXT" + ")";
         db.execSQL(CREATE_DEVICE_MAP_TABLE);
-    }
+   }
 
     // Upgrading database
     @Override

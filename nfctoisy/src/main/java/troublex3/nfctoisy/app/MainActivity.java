@@ -1,10 +1,12 @@
 package troublex3.nfctoisy.app;
 
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,6 +15,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.nfc.*;
 import android.os.Parcelable;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Looper;
 import android.os.Build;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -30,8 +35,8 @@ import android.widget.Toast;
 
 import java.net.HttpURLConnection;
 
-public class MainActivity extends ActionBarActivity {
-
+public class MainActivity extends ActionBarActivity
+{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,8 +48,55 @@ public class MainActivity extends ActionBarActivity {
                     .commit();
         }
 
-        device = new ISYDevice("", "admin", "");
+
         database = new DeviceMappingDatabaseHandler(this);
+        mHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message msg)
+            {
+                handleBackgroundMessage(msg);
+            }
+        };
+
+        Initialize();
+    }
+
+    protected void handleBackgroundMessage(Message msg)
+    {
+        showToastMessage("Result of operation: " + currentRequest.getResult());
+        currentRequest = null;
+    }
+
+    protected void setupIntialValues()
+    {
+        DeviceMapEntry newEntry = new DeviceMapEntry();
+        newEntry.setAddress("17 D5 A8 2");
+        newEntry.setAlias("garagedoor");
+        database.addDeviceMapEntry(newEntry);
+
+        newEntry = new DeviceMapEntry();
+        newEntry.setAddress("22 B1 2A 1");
+        newEntry.setAlias("frontdoor");
+        database.addDeviceMapEntry(newEntry);
+    }
+
+    // Makes sure preferences are defaulted and settings are read
+    protected void Initialize()
+    {
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
+
+        if(database.getAllDeviceMapEntries().size() == 0)
+        {
+            setupIntialValues();
+        }
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
+        isyUri = sharedPref.getString(SettingsActivity.KEY_PREF_ISY_ADDRESS, "");
+        isyUserName = sharedPref.getString(SettingsActivity.KEY_PREF_ISY_USERNAME, "");
+        isyPassword = sharedPref.getString(SettingsActivity.KEY_PREF_ISY_PASSWORD, "");
+
+        device = new ISYDevice(isyUri, isyUserName, isyPassword);
     }
 
     protected URI getUriFromNdef(Intent intent)
@@ -85,8 +137,7 @@ public class MainActivity extends ActionBarActivity {
 
                         try
                         {
-                            URI uri = new URI(uriText);
-                            return uri;
+                            return new URI(uriText);
                         }
                         catch(URISyntaxException except)
                         {
@@ -127,11 +178,11 @@ public class MainActivity extends ActionBarActivity {
 
                 if(uri.getPath().compareToIgnoreCase("/off") == 0)
                 {
-                    currentRequest = device.ExecuteRequest(entry.getAddress(), false);
+                    currentRequest = device.ExecuteRequest(entry.getAddress(), false, mHandler);
                 }
                 else if(uri.getPath().compareToIgnoreCase("/on") == 0)
                 {
-                    currentRequest = device.ExecuteRequest(entry.getAddress(), true);
+                    currentRequest = device.ExecuteRequest(entry.getAddress(), true, mHandler);
                 }
             }
         }
@@ -148,7 +199,11 @@ public class MainActivity extends ActionBarActivity {
 
         Intent intent = getIntent();
 
-        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction()))
+        if(Intent.ACTION_MAIN.equals(intent.getAction()))
+        {
+            Initialize();
+        }
+        else if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction()))
         {
             onNfcAction(intent);
         }
@@ -209,6 +264,10 @@ public class MainActivity extends ActionBarActivity {
     protected ISYHttpRequest request;
     protected DeviceMappingDatabaseHandler database;
     protected ISYHttpRequest currentRequest;
+    protected String isyUri;
+    protected String isyUserName;
+    protected String isyPassword;
+    protected Handler mHandler;
 }
 
 
