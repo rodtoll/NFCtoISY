@@ -59,6 +59,11 @@ public class MainActivity extends ActionBarActivity
         };
 
         Initialize();
+
+        /*DeviceMapEntry newEntry = new DeviceMapEntry();
+        newEntry.setAddress("1A 11 98 1");
+        newEntry.setAlias("office");
+        database.addDeviceMapEntry(newEntry);*/
     }
 
     protected void handleBackgroundMessage(Message msg)
@@ -184,6 +189,7 @@ public class MainActivity extends ActionBarActivity
                 {
                     currentRequest = device.ExecuteRequest(entry.getAddress(), true, mHandler);
                 }
+                setIntent(new Intent()); // Consume this intent.
             }
         }
         else
