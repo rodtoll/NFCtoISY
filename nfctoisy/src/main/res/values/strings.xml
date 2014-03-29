@@ -4,5 +4,7 @@
     <string name="app_name">NFCtoISY</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="action_devices">Devices</string>
+    <string name="title_activity_device_map_editor">DeviceMapEditorActivity</string>
 
 </resources>

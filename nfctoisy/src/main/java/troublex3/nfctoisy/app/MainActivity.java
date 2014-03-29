@@ -246,6 +246,11 @@ public class MainActivity extends ActionBarActivity
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
         }
+        else if(id == R.id.action_devices)
+        {
+            Intent intent = new Intent(this, DeviceMapEditorActivity.class);
+            startActivity(intent);
+        }
 
         return super.onOptionsItemSelected(item);
     }
